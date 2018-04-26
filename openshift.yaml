@@ -1,0 +1,150 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: spring-web-openshift
+    name: spring-web-openshift
+  spec: {}
+  status:
+    dockerImageRepository: ""
+
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: spring-web-openshift
+    namespace: tests-utils
+    labels:
+      app: spring-web-openshift
+  spec:
+    triggers:
+      - type: Generic
+        generic:
+          secret: 2dceede7abfb48e4
+      - type: ImageChange
+      - type: ConfigChange
+    runPolicy: Serial
+    source:
+      type: Git
+      git:
+        uri: 'https://git.sicredi.net/soppagr/opp-localizacao-integration.git'
+        ref: master
+      sourceSecret:
+        name: rural-cer
+    strategy:
+      type: Source
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: 's2i-java:1.8-gradle'
+        env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: test
+          - name: _JAVA_OPTIONS
+            value: -Xmx256m -Xms128m -XX:MaxMetaspaceSize=128m -Xss256k
+          - name: ARTIFACT_DIR
+            value: ./opp-localizacao-integration-api/build/libs/
+          - name: GRADLE_ARGS
+            value: build -x test
+          - name: LANG
+            value: en_US.UTF-8
+
+    output:
+      to:
+        kind: ImageStreamTag
+        name: 'opp-localizacao-integration:latest'
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: opp-localizacao-integration
+    name: opp-localizacao-integration
+  spec:
+    replicas: 1
+    selector:
+      app: opp-localizacao-integration
+      deploymentconfig: opp-localizacao-integration
+    strategy:
+      resources: {}
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: opp-localizacao-integration
+          deploymentconfig: opp-localizacao-integration
+      spec:
+        containers:
+        - image: opp-localizacao-integration:latest
+          name: opp-localizacao-integration
+          ports:
+          - containerPort: 8091
+            protocol: TCP
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: test
+            - name: _JAVA_OPTIONS
+              value: -Xmx256m -Xms128m -XX:MaxMetaspaceSize=128m -Xss256k
+            - name: LANG
+              value: en_US.UTF-8
+          resources: {}
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - opp-localizacao-integration
+        from:
+          kind: ImageStreamTag
+          name: opp-localizacao-integration:latest
+      type: ImageChange
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: opp-localizacao-integration
+    name: opp-localizacao-integration
+  spec:
+    ports:
+    - name: 8091-tcp
+      port: 8091
+      protocol: TCP
+      targetPort: 8091
+    selector:
+      app: opp-localizacao-integration
+      deploymentconfig: opp-localizacao-integration
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: opp-localizacao-integration
+  spec:
+    host: opp-localizacao-integration-rural3.paas.sicredi.net
+    port:
+      targetPort: 8091-tcp
+    to:
+      kind: Service
+      name: opp-localizacao-integration
+
+kind: List
+metadata: {}
