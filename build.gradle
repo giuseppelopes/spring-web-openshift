@@ -43,6 +43,14 @@ repositories {
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
