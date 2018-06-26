@@ -19,21 +19,6 @@ jar {
 }
 
 repositories {
-    maven {
-        url "http://artifactory.sicredi.net/artifactory/repo"
-        credentials {
-            username = mavenUser
-            password = mavenPassword
-        }
-    }
-
-    maven {
-        url "http://artifactory.sicredi.net/artifactory/libs-snapshot-local"
-        credentials {
-            username = mavenUser
-            password = mavenPassword
-        }
-    }
     maven { url "http://repo.spring.io/milestone" }
     maven { url "http://repo.spring.io/release" }
     maven { url "http://jaspersoft.artifactoryonline.com/jaspersoft/third-party-ce-artifacts/" }
