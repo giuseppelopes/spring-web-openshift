@@ -135,7 +135,7 @@ items:
   metadata:
     name: spring-web-openshift
   spec:
-    host: spring-web-openshift-tests-utils.paas.sicredi.net
+    host: spring-web-openshift-tests.domain.net
     port:
       targetPort: 8091-tcp
     to:
